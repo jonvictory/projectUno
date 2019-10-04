@@ -1,0 +1,73 @@
+<html>
+
+<head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+        #map {
+            height: 100%;
+        }
+
+        /* Optional: Makes the sample page fill the window. */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <link rel="stylesheet" href="assets/css/tailwind.css">
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <button id="mapButt" class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded"></button>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <script src="assets/javascript/project.js"></script>
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCK4EWTo5MHbt_OTstSiYYGKw5twoR8xuk&callback=initMap"
+        async defer></script> -->
+
+
+    <script>
+
+
+
+        var mapQuer
+        var apiKey = "AIzaSyCK4EWTo5MHbt_OTstSiYYGKw5twoR8xuk"
+
+        $('#mapButt').click(function (e) {
+
+            e.preventDefault();
+
+            var map;
+            function initMap() {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: { lat: -34.397, lng: 150.644 },
+                    zoom: 8
+                });
+            }
+
+            queryUrl = 'https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/js?key='+apiKey+'&callback=initMap';
+
+            console.log(queryUrl)
+
+            $.ajax({
+                url: queryUrl,
+                method: "GET",
+                
+            }).then(function (response) {
+
+                console.log(response)
+            })
+        })
+
+    </script>
+</body>
+
+</html>
