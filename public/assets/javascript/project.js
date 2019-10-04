@@ -1,8 +1,14 @@
 $(document).ready(function () {
     initMap();
+    
     //variables for Yelp API calls
     var term = '';
     var location = '';
+    var name = '';
+    var city = '';
+    var longitude = '';
+    var latitude = '';
+
     
 
     //search onclick that grabs values and stores from term and location
@@ -14,6 +20,7 @@ $(document).ready(function () {
         console.log(location);
         console.log(term);
     });
+  
 
     //Ajax Call for Yelp API
     function yelpAPI() {
@@ -28,17 +35,44 @@ $(document).ready(function () {
             dataType: 'json',
             success: function (data) {
                 $.each(data.businesses, function (i, response) {
-                    console.log(response);
-                    var name = response.name;
-                    var location = response.location;
-                    $("#results").append(name);
-                    $("#results").append(location);
+                    // console.log(response);
+                    name = response.name;
+                    location = response.location;
+                    city = response.location.city;
+                    longitude = response.coordinates.longitude;
+                    latitude = response.coordinates.latitude;
+                    var resultsDiv = $("<div>");
+                    var nameResult = $("<a>")
+                    
+                    resultsDiv.attr('class', 'selectedRes border-solid border-2 mt-1 border-black')
+                    nameResult.append(name);
+                    resultsDiv.attr('data-longitude', response.coordinates.longitude);
+                    resultsDiv.attr('data-latitude', response.coordinates.latitude);
+                    resultsDiv.append(nameResult);
+                    $("#results").append(resultsDiv);
                 });
+                clickSelection();
             }
         });
 
     }
 
+
+    //click function that currently console.logs the latitude and longitude of the selected location
+    var mapLongitude = '';
+    var mapLatitude = '';
+
+
+   function clickSelection(){
+    $('.selectedRes').on("click", function () {
+        mapLongitude = $(this).attr('data-longitude')
+        mapLatitude = $(this).attr('data-latitude')
+        console.log(mapLatitude);
+        console.log(mapLongitude);
+    });
+   }
+
+  
     //google map API js
     
 
