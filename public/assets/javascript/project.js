@@ -103,6 +103,7 @@ $(document).ready(function () {
                     span.append(name);
                     resultsDiv.attr('data-longitude', response.coordinates.longitude);
                     resultsDiv.attr('data-latitude', response.coordinates.latitude);
+                    resultsDiv.attr('data-name', response.name);
                     // chris - changed append to label from nameResult
                     resultsDiv.append(label );
                     $("#results").append(resultsDiv);
@@ -124,6 +125,8 @@ $(document).ready(function () {
     $('.selectedRes').on("click", function () {
         mapLongitude = $(this).attr('data-longitude')
         mapLatitude = $(this).attr('data-latitude')
+        name = $(this).attr('data-name')
+        geoMarker()
         console.log(mapLatitude);
         console.log(mapLongitude);
     });
@@ -190,7 +193,7 @@ $(document).ready(function () {
         var request = {
             location: map.getCenter(),
             radius: '1000',
-            query: "Rooster's brewing"
+            query: name
         };
 
         console.log(request)
