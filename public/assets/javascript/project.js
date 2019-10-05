@@ -206,6 +206,7 @@ $(document).ready(function () {
     // chris - functions that starts time when start timer button is clicked. this will be tweaked when the polling section works.
     $("#startTimer").on("click", function (event)
     {
+        clearInterval(intervalId);
         intervalId = setInterval(countDown, 1000);
     });
 
