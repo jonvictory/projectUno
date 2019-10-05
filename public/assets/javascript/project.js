@@ -107,7 +107,7 @@ $(document).ready(function () {
                     $("#results").append(resultsDiv);
                 });
                 clickSelection();
-                geoMarker();
+                // geoMarker();
             }
         });
 
