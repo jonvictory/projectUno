@@ -1,3 +1,6 @@
+// chris - variable that will be part of limiting result selection to three
+var resultsSelect = 0;
+
 $(document).ready(function () {
     initMap();
     
@@ -46,13 +49,62 @@ $(document).ready(function () {
                     longitude = response.coordinates.longitude;
                     latitude = response.coordinates.latitude;
                     var resultsDiv = $("<div>");
-                    var nameResult = $("<a>")
                     
+                    // chris - checkbox code
+                    var label = $("<label>");
+                    var checkbox = $("<input>");
+                    var span = $("<span>");
+
+                    checkbox.attr("type", "checkbox", "class", "ml-1 form-checkbox", "checked", "false");
+                    span.attr("class", "ml-2");
+
+                    label.append(checkbox);
+                    label.append(span);
+
+                    // chris - code that tracks the amount of results selected
+                    checkbox.on("click", function (event)
+                    {
+                        console.log("Restaurant selected");
+                        if ($(this).prop("checked") === true)
+                        {
+                            if (resultsSelect >= 3)
+                            {
+                                checkbox.prop("checked", false);
+                                // chris - enables Begin Poll button once 3 restaurant options are selected
+                                $("#beginPollBtn").removeClass("opacity-50 cursor-not-allowed")
+                            }
+                            else
+                            {
+                                resultsSelect++;
+                                // chris - disables Begin Poll button until 3 restaurant options are selected
+                                $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed")
+                            }
+                        }
+                        else
+                        {
+                            resultsSelect--;
+                            // chris - disables Begin Poll button until 3 restaurant options are selected
+                            $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed")
+                        }
+
+                        console.log(resultsSelect);
+
+                        //This is required or else 4 clicks on different boxes is needed to get the button to light up.
+                        if (resultsSelect === 3)
+                        {
+                            $("#beginPollBtn").removeClass("opacity-50 cursor-not-allowed")
+                        }
+                    });
+                    
+                    //var nameResult = $("<a>")
                     resultsDiv.attr('class', 'selectedRes border-solid border-2 mt-1 border-black')
-                    nameResult.append(name);
+                    //nameResult.append(name);
+                    // chris - changed to span.append from nameResult.append
+                    span.append(name);
                     resultsDiv.attr('data-longitude', response.coordinates.longitude);
                     resultsDiv.attr('data-latitude', response.coordinates.latitude);
-                    resultsDiv.append(nameResult);
+                    // chris - changed append to label from nameResult
+                    resultsDiv.append(label );
                     $("#results").append(resultsDiv);
                 });
                 clickSelection();
