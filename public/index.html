@@ -1,4 +1,4 @@
-<html lang="en">
+<!DOCTYPE html>
 
 <head>
 
@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>What to eat?</title>
   <link rel="stylesheet" href="assets/css/tailwind.css">
-
+  <html lang="en">
 </head>
 <body>
 
@@ -32,37 +32,35 @@
       </div>
 
 <!-- Map/Results Div -->
-      <div id="results" class="w-1/2 ml-1 bg-gray-500 h-64">Results</div>
+      <div id="results" class="w-1/2 overflow-hidden overflow-y-scroll ml-1 bg-gray-500 h-64">Results</div>
       <div id="map" class="w-1/2 ml-1 bg-gray-500 h-64">Map</div>
       
     </div>
     
 
 <!-- Button Div -->
-    <div class="flex mb-4">
-      <div class="w-1/4 bg-gray-400 h-64">
-        <button
-          class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
-          About Artist
-        </button>
-        <button
-          class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
-          Lyrics
-        </button>
-        <button
-          class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
-          Youtube Vid
-        </button>
-      </div>
-      <div class="w-3/4 ml-1 bg-gray-500 h-64">Content Div</div>
-    </div>
+<div class="flex mb-4">
+  <div class="w-1/4 bg-gray-400 h-64">
+    <button
+      class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
+      Begin Poll
+    </button>
+  </div>
+  <div class="w-3/4 ml-1 bg-gray-500 h-64">
+    <button
+      id="beginPollBtn" class="opacity-50 cursor-not-allowed bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
+      Begin Poll
+    </button>
+  </div>
+</div>
+
+    <script
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCK4EWTo5MHbt_OTstSiYYGKw5twoR8xuk&libraries=places&callback=initMap"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
     <script src="assets/javascript/project.js"></script>
 
-
-  </div>
 </body>
 
 </html>
