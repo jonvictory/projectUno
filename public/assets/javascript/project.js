@@ -2,9 +2,7 @@
 var resultsSelect = 0;
 
 $(document).ready(function () {
-    initMap();
-    
-    //variables for Yelp API calls
+       //variables for Yelp API calls
     var term = '';
     var location = '';
     var name = '';
@@ -134,26 +132,7 @@ $(document).ready(function () {
 
   
     //google map API js
-    
 
-    var map
-    var slc = {lat: 40.7608, lng: -111.8910};
-    function initMap() {
-      map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: 40.7608, lng: -111.8910},
-        zoom: 8
-      });
-    }
-
-    function searchMap() {
-        // The location of Uluru
-        var searchLocation = {lat: 41.7608, lng: -115.8910}
-        // The map, centered at Uluru
-        var map = new google.maps.Map(
-            document.getElementById('map'), {zoom: 4, center: slc});
-        // The marker, positioned at Uluru
-        var marker = new google.maps.Marker({position: searchLocation, map: map});
-      }
       function geoInitialize() {
         // Create a map centered in SLC.
         map = new google.maps.Map(document.getElementById('map'), {
