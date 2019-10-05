@@ -1,8 +1,15 @@
 // chris - variable that will be part of limiting result selection to three
 var resultsSelect = 0;
 
+// chris - variable used for timer function
+var time = 179; // chris - time has to be 1 second less than the time you want to display
+var minutes = Math.trunc(time / 60);
+var seconds = time % 60;
+var timeString = minutes + ":" + seconds;
+var intervalId;
+
 $(document).ready(function () {
-       //variables for Yelp API calls
+    //variables for Yelp API calls
     var term = '';
     var location = '';
     var name = '';
@@ -14,7 +21,8 @@ $(document).ready(function () {
     //Global variables for map functions:
     var map
 
-    
+    // chris - used to display 3:00 for timer div
+    $("#timer").html("3:00");
 
     //search onclick that grabs values and stores from term and location
     $("#search").on("click", function (event) {
@@ -103,7 +111,7 @@ $(document).ready(function () {
                     resultsDiv.attr('data-latitude', response.coordinates.latitude);
                     resultsDiv.attr('data-name', response.name);
                     // chris - changed append to label from nameResult
-                    resultsDiv.append(label );
+                    resultsDiv.append(label);
                     $("#results").append(resultsDiv);
                 });
                 clickSelection();
@@ -194,5 +202,39 @@ $(document).ready(function () {
             }
         }
     }
+
+    // chris - functions that starts time when start timer button is clicked. this will be tweaked when the polling section works.
+    $("#startTimer").on("click", function (event)
+    {
+        intervalId = setInterval(countDown, 1000);
+    });
+
+
    
 });
+
+// chris - function that handles timer when polling is open
+function countDown()
+{
+    $("#timer").html(timeString);
+    console.log(timeString);
+
+    if(time <= 0)
+    {
+        clearInterval(intervalId);
+        $("#timer").html("0:00");
+        console.log("time's up!")
+        // chris - this function below isn't built yet, it will display poll results when time hits zero.
+        //voteResult();
+    }
+
+    time--;
+    minutes = Math.trunc(time / 60);
+    seconds = time % 60;
+    if (seconds < 10)
+    {
+        seconds = "0" + seconds;
+    }
+    timeString = minutes + ":" + seconds;
+
+}
