@@ -8,6 +8,10 @@ $(document).ready(function () {
     var city = '';
     var longitude = '';
     var latitude = '';
+    // initMap();   
+    geoInitialize()
+    //Global variables for map functions:
+    var map
 
     
 
@@ -16,7 +20,7 @@ $(document).ready(function () {
         location = $("#locationInput").val().trim();
         term = $("#termInput").val().trim();
         yelpAPI();
-        searchMap()
+        geoFirstClick()
         console.log(location);
         console.log(term);
     });
@@ -52,6 +56,7 @@ $(document).ready(function () {
                     $("#results").append(resultsDiv);
                 });
                 clickSelection();
+                geoMarker();
             }
         });
 
@@ -94,6 +99,66 @@ $(document).ready(function () {
         // The marker, positioned at Uluru
         var marker = new google.maps.Marker({position: searchLocation, map: map});
       }
-    
+      function geoInitialize() {
+        // Create a map centered in SLC.
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: 40.7608, lng: -111.8910 },
+            zoom: 15
+        });
+    }
+
+    function geoFirstClick(city) {
+
+        var geoApiKey = 'AIzaSyCK4EWTo5MHbt_OTstSiYYGKw5twoR8xuk'
+        var geoQueryUrl = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + location + '&key=' + geoApiKey;
+
+        console.log(geoQueryUrl)
+
+        $.ajax({
+            url: geoQueryUrl,
+            method: "GET"
+        }).then(function (response) {
+
+            var geoResponse = response.results[0].geometry.location
+
+            geoFirstClickUpdate(geoResponse)
+        });
+    }
+
+
+    function geoFirstClickUpdate(geoResponse) {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: geoResponse,
+            zoom: 15
+        });
+    }
+
+    function geoMarker() {
+        // CURRENTLY: will add pin for roosters brewery in OGDEN. CITY SEARCH: OGDEN to test.
+        var request = {
+            location: map.getCenter(),
+            radius: '1000',
+            query: "Rooster's brewing"
+        };
+
+        console.log(request)
+        var service = new google.maps.places.PlacesService(map);
+        service.textSearch(request, callback);
+
+
+        // Checks that the PlacesServiceStatus is OK, and adds a marker
+        // using the place ID and location from the PlacesService.
+        function callback(results, status) {
+            if (status == google.maps.places.PlacesServiceStatus.OK) {
+                var marker = new google.maps.Marker({
+                    map: map,
+                    place: {
+                        placeId: results[0].place_id,
+                        location: results[0].geometry.location
+                    }
+                });
+            }
+        }
+    }
    
 });
