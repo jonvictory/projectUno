@@ -8,18 +8,23 @@ var seconds = time % 60;
 var timeString = minutes + ":" + seconds;
 var intervalId;
 
+// chris - array used to store checked restaurants
+var selectionArray = [];
+// chris - array used to store map markers
+var markers = [];
+var map;
+
 $(document).ready(function () {
     //variables for Yelp API calls
     var term = '';
     var location = '';
     var name = '';
-    var city = '';
-    var longitude = '';
-    var latitude = '';
-    // initMap();   
+    //var city = '';
+    //var longitude;
+    //var latitude;
+    //initMap();   
     geoInitialize()
-    //Global variables for map functions:
-    var map
+
 
     // chris - used to display 3:00 for timer div
     $("#timer").html("3:00");
@@ -34,7 +39,6 @@ $(document).ready(function () {
         console.log(term);
     });
   
-
     //Ajax Call for Yelp API
     function yelpAPI() {
         var queryUrl = "https://cors-anywhere.herokuapp.com/https://api.yelp.com/v3/businesses/search?term=" + term + "&location=" + location;
@@ -48,14 +52,14 @@ $(document).ready(function () {
             dataType: 'json',
             success: function (data) {
                 $.each(data.businesses, function (i, response) {
-                    // console.log(response);
+                    console.log(response);
                     name = response.name;
                     location = response.location;
-                    city = response.location.city;
-                    longitude = response.coordinates.longitude;
-                    latitude = response.coordinates.latitude;
+                    // city = response.location.city;
+                    // longitude = response.coordinates.longitude;
+                    // latitude = response.coordinates.latitude;
                     var resultsDiv = $("<div>");
-                    
+
                     // chris - checkbox code
                     var label = $("<label>");
                     var checkbox = $("<input>");
@@ -67,43 +71,99 @@ $(document).ready(function () {
                     label.append(checkbox);
                     label.append(span);
 
+                    // chris - self variable had to be created to reference a proper scope
+                    // for the variables needed
+                    var self = this;
+
                     // chris - code that tracks the amount of results selected
+                    // chris - checkbox.on click is a call back function
                     checkbox.on("click", function (event)
                     {
-                        console.log("Restaurant selected");
+                        // console.log("Restaurant selected");
                         if ($(this).prop("checked") === true)
                         {
                             if (resultsSelect >= 3)
                             {
                                 checkbox.prop("checked", false);
                                 // chris - enables Begin Poll button once 3 restaurant options are selected
-                                $("#beginPollBtn").removeClass("opacity-50 cursor-not-allowed")
+                                $("#beginPollBtn").removeClass("opacity-50 cursor-not-allowed");
+
+                                console.log("Max selections already reached.");
                             }
                             else
                             {
                                 resultsSelect++;
-                                // chris - disables Begin Poll button until 3 restaurant options are selected
-                                $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed")
+
+                                // chris - checks to see if 3 selections have been made. if three selections have 
+                                // been made, then the poll button is enabled.
+                                if(resultsSelect === 3)
+                                {
+                                    $("#beginPollBtn").removeClass("opacity-50 cursor-not-allowed");
+                                }
+                                else
+                                {
+                                    $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed");
+
+                                }
+
+                                // chris - object that stores items that will be pushed into array.
+                                var selectionObject =
+                                {
+                                    name:   self.name,
+                                    lng:    self.coordinates.longitude,
+                                    lat:    self.coordinates.latitude,
+                                    addr:   self.location.display_address,
+                                    rating: self.rating,
+                                    url:    self.url,                                   
+                                };
+
+                                // chris - command that pushes object into selectionArray
+                                selectionArray.push(selectionObject);
+                                console.log("SelectionArray: " + JSON.stringify(selectionArray));
+                                console.log(selectionObject);
+                                addMarker(selectionObject);
+
+                                console.log("Selection added.");
                             }
                         }
                         else
                         {
                             resultsSelect--;
                             // chris - disables Begin Poll button until 3 restaurant options are selected
-                            $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed")
-                        }
+                            $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed");
 
-                        console.log(resultsSelect);
+                            // chris - iterates through the array and finds the name of the restaurant 
+                            // to be removed.
+                            for(let i = 0; i < selectionArray.length; i++)
+                            {
+                                // chris -
+                                // if statement below checks the name, latitude and longitude that is being deleted. 
+                                // rounding errors also need to betaken into account so the numbers are cut off
+                                // at 5 decimal places. this whole piece is important because if multiple 
+                                // restaurants with the same name, but different location are selected (i.e. McDonald's 
+                                // and other chains), then all of them would be deleted. including lat and long
+                                // helps account for that.
+                                if
+                                (
+                                    selectionArray[i].name === self.name &&
+                                    selectionArray[i].lng  === self.coordinates.longitude &&
+                                    selectionArray[i].lat  === self.coordinates.latitude
+                                )
+                                {
+                                    removeMarker(selectionArray[i]);
+                                    selectionArray.splice(i, 1);
+                                }
+                            }
+                            
+                            console.log("SelectionArray: " + JSON.stringify(selectionArray));
+                            console.log("Selection removed.");
 
-                        //This is required or else 4 clicks on different boxes is needed to get the button to light up.
-                        if (resultsSelect === 3)
-                        {
-                            $("#beginPollBtn").removeClass("opacity-50 cursor-not-allowed")
                         }
+                        console.log("Selections checked: " + resultsSelect);
                     });
                     
                     //var nameResult = $("<a>")
-                    resultsDiv.attr('class', 'selectedRes border-solid border-2 mt-1 border-black')
+                    resultsDiv.attr('class', 'selectedRes border-solid border-2 mt-1 border-black');
                     //nameResult.append(name);
                     // chris - changed to span.append from nameResult.append
                     span.append(name);
@@ -113,30 +173,88 @@ $(document).ready(function () {
                     // chris - changed append to label from nameResult
                     resultsDiv.append(label);
                     $("#results").append(resultsDiv);
+
                 });
-                clickSelection();
-                geoMarker();
             }
         });
-
     }
 
+    // chris - function to add a marker to google map
+    function addMarker(selectionObject)
+    {
+        // chris - create a marker and adds it to google maps
+        var thisMarker = new google.maps.Marker
+        ({
+            position: {lat: selectionObject.lat, lng: selectionObject.lng},
+            map: map,
+            title: selectionObject.name
+        });
+
+        // chris - adds a new marker to the markers array
+        markers.push(thisMarker);
+        console.log(thisMarker);
+    }
+
+    // chris - function to remove a marker from the map
+    function removeMarker(selectionObject)
+    {
+        for(let i = 0; i < markers.length; i++)
+        {
+            // chris -
+            // if statement below checks the name, latitude and longitude that is being deleted. 
+            // rounding errors also need to betaken into account so the numbers are cut off
+            // at 5 decimal places. this whole piece is important because if multiple 
+            // restaurants with the same name, but different location are selected (i.e. McDonald's 
+            // and other chains), then all of them would be deleted. including lat and long
+            // helps account for that.
+            if
+            (
+                markers[i].title === selectionObject.name &&
+                markers[i].position.lat().toFixed(5) === selectionObject.lat.toFixed(5) &&
+                markers[i].position.lng().toFixed(5) === selectionObject.lng.toFixed(5)
+            )
+            {
+                // chris - removes the marker from the map and the marker array.
+                markers[i].setMap(null);
+                markers.splice(i, 1);
+            }
+        }
+    }
+
+    /************************************************/
+
+    /*
+    chris - i was trying to build a remove marker function based on this information but, since we
+    weren't using arrays yet, it wasn't working right. the functions to add markers had to be rebuilt
+    with arrays in mind. once the arrays were set up, that same information could be used to remove
+    markers as well.
 
     //click function that currently console.logs the latitude and longitude of the selected location
     var mapLongitude = '';
     var mapLatitude = '';
 
+    function checkBoxMap ()
+    {
+        mapLongitude = $(this).attr('data-longitude')
+        mapLatitude = $(this).attr('data-latitude')
+        name = $(this).attr('data-name')
+        console.log(mapLatitude);
+        console.log(mapLongitude);
+    }
+    */
 
+  /*
    function clickSelection(){
     $('.selectedRes').on("click", function () {
         mapLongitude = $(this).attr('data-longitude')
         mapLatitude = $(this).attr('data-latitude')
         name = $(this).attr('data-name')
-        geoMarker()
+        geoMarker();
         console.log(mapLatitude);
         console.log(mapLongitude);
     });
    }
+   */
 
   
     //google map API js
@@ -167,13 +285,18 @@ $(document).ready(function () {
         });
     }
 
-
     function geoFirstClickUpdate(geoResponse) {
         map = new google.maps.Map(document.getElementById('map'), {
             center: geoResponse,
             zoom: 15
         });
     }
+
+    /*
+    chris - i was trying to build a remove marker function based on this information but, since we
+    weren't using arrays yet, it wasn't working right. the functions to add markers had to be rebuilt
+    with arrays in mind. once the arrays were set up, that same information could be used to remove
+    markers as well.
 
     function geoMarker() {
         // CURRENTLY: will add pin for roosters brewery in OGDEN. CITY SEARCH: OGDEN to test.
@@ -186,7 +309,6 @@ $(document).ready(function () {
         console.log(request)
         var service = new google.maps.places.PlacesService(map);
         service.textSearch(request, callback);
-
 
         // Checks that the PlacesServiceStatus is OK, and adds a marker
         // using the place ID and location from the PlacesService.
@@ -202,16 +324,15 @@ $(document).ready(function () {
             }
         }
     }
+    */
 
-    // chris - functions that starts time when start timer button is clicked. this will be tweaked when the polling section works.
+    // chris - functions that starts time when start timer button is clicked. 
+    // this will be tweaked when the polling section works.
     $("#startTimer").on("click", function (event)
     {
         clearInterval(intervalId);
         intervalId = setInterval(countDown, 1000);
     });
-
-
-   
 });
 
 // chris - function that handles timer when polling is open
@@ -237,5 +358,8 @@ function countDown()
         seconds = "0" + seconds;
     }
     timeString = minutes + ":" + seconds;
-
 }
+
+
+
+
