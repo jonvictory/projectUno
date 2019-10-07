@@ -76,10 +76,7 @@ $(document).ready(function () {
     var city = '';
     var longitude = '';
     var latitude = '';
-    var phone = '';
-    var price = '';
-    var rating = '';
-    var reviewCount = '';
+    
 
     // initMap();   
     geoInitialize()
@@ -118,12 +115,15 @@ $(document).ready(function () {
                     city = response.location.city;
                     phone = response.phone
                     price = response.price
+                    console.log(price)
                     rating = response.rating
                     reviewCount = response.review_count
                     longitude = response.coordinates.longitude;
                     latitude = response.coordinates.latitude;
                     var resultsDiv = $("<div>");
                     console.log(data.businesses)
+                    console.log(response.price)
+                    console.log(price)
                     // chris - checkbox code
                     var label = $("<label>");
                     var checkbox = $("<input>");
@@ -178,6 +178,13 @@ $(document).ready(function () {
                     resultsDiv.attr('data-longitude', response.coordinates.longitude);
                     resultsDiv.attr('data-latitude', response.coordinates.latitude);
                     resultsDiv.attr('data-name', response.name);
+                    resultsDiv.attr('data-city', response.city);
+                    resultsDiv.attr('data-phone', response.phone);
+                    resultsDiv.attr('data-price', response.price);
+                    console.log(response.price)
+                    console.log(response.coordinates.longitude)
+                    resultsDiv.attr('data-rating', response.rating);
+                    resultsDiv.attr('data-reviewCount', response.review_count);
                     // chris - changed append to label from nameResult
                     resultsDiv.append(label );
                     $("#results").append(resultsDiv);
@@ -193,16 +200,36 @@ $(document).ready(function () {
     //click function that currently console.logs the latitude and longitude of the selected location
     var mapLongitude = '';
     var mapLatitude = '';
-
-
+    var phone = '';
+    var price = '';
+    var rating = '';
+    var reviewCount = '';
+    console.log(mapLatitude);
+        console.log(mapLongitude);
+        console.log(city);
+        console.log(phone);
+        console.log(name);
+        console.log(price)
+        console.log(rating);
+        console.log(reviewCount);
    function clickSelection(){
     $('.selectedRes').on("click", function () {
         mapLongitude = $(this).attr('data-longitude')
         mapLatitude = $(this).attr('data-latitude')
         name = $(this).attr('data-name')
+        city = $(this).attr('data-city')
+        phone = $(this).attr('data-phone')
+        price = $(this).attr('data-price')
+        rating = $(this).attr('data-rating')
+        reviewCount = $(this).attr('data-review_count')
         geoMarker()
         console.log(mapLatitude);
         console.log(mapLongitude);
+        console.log(city);
+        console.log(phone);
+        console.log(name);
+        console.log(rating);
+        console.log(reviewCount);
     });
    }
 
@@ -245,6 +272,10 @@ $(document).ready(function () {
 
     function geoMarker() {
         // CURRENTLY: will add pin for roosters brewery in OGDEN. CITY SEARCH: OGDEN to test.
+        phone
+        rating
+        price
+        reviewCount
         var request = {
             location: map.getCenter(),
             radius: '1000',
@@ -272,7 +303,7 @@ $(document).ready(function () {
       '</div>'+
       '<h1 id="firstHeading" class="firstHeading">'+name+'</h1>'+
       '<div id="bodyContent">'+
-      '<p><b>'+name+'</b>, is located in <b>'+city+'</b>. Lil Bits:</p>'+
+      '<p><b>'+name+'</b>, is located in <b>'+city+'</b>.</p>'+
       '<p><ul><li><b>Phone:</b>'+phone+'</li><li><b>Rating:</b>'+rating+'</li><li><b>Review Count:</b>'+reviewCount+'</li><li><b>Price:</b>'+price+'</li></ul></p>'
       '<p>Attribution: Uluru, <a href="https://en.wikipedia.org/w/index.php?title=Uluru&oldid=297882194">'+
       'https://en.wikipedia.org/w/index.php?title=Uluru</a> '+
