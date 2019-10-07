@@ -86,7 +86,7 @@ $(document).ready(function () {
                     // longitude = response.coordinates.longitude;
                     // latitude = response.coordinates.latitude;
                     var resultsDiv = $("<div>");
-
+console.log(response)
                     // chris - checkbox code
                     var label = $("<label>");
                     var checkbox = $("<input>");
@@ -152,6 +152,10 @@ $(document).ready(function () {
                                     lat:    self.coordinates.latitude,
                                     addr:   self.location.display_address,
                                     rating: self.rating,
+                                    reviewCount: self.review_count,
+                                    price: self.price,
+                                    phone: self.phone,
+                                    city: self.location.city,
                                     url:    self.url,                                   
                                 };
 
@@ -208,16 +212,12 @@ $(document).ready(function () {
                     resultsDiv.attr('data-longitude', response.coordinates.longitude);
                     resultsDiv.attr('data-latitude', response.coordinates.latitude);
                     resultsDiv.attr('data-name', response.name);
+                    resultsDiv.attr('data-price', response.price);
                     // chris - changed append to label from nameResult
                     resultsDiv.append(label);
                     $("#results").append(resultsDiv);
 
                 });
-<<<<<<< HEAD
-                clickSelection();
-                // geoMarker();
-=======
->>>>>>> 1850ab19fc5f8270ef2fe163299605a6a024f7ab
             }
         });
     }
@@ -230,8 +230,29 @@ $(document).ready(function () {
         ({
             position: {lat: selectionObject.lat, lng: selectionObject.lng},
             map: map,
-            title: selectionObject.name
+            title: selectionObject.name,
+            price: selectionObject.price,
+            rating: selectionObject.rating,
+            reviewCount: selectionObject.reviewCount,
+            city: selectionObject.city
+
+            
         });
+        //adds info window to click.
+    var contentString = '<div id="content">'+
+    '<div id="siteNotice">'+
+        '</div>'+
+        '<h1 id="firstHeading" class="firstHeading">'+selectionObject.name+'</h1>'+
+        '<div id="bodyContent">'+
+        '<ul><li>Rating: '+selectionObject.rating+'</li><li>Total Reviews: '+selectionObject.reviewCount+'</li><li>Price Level: '+selectionObject.price+'</li><li>City: '+selectionObject.city+ '</li>';
+  
+    var infowindow = new google.maps.InfoWindow({
+      content: contentString
+    });
+  
+    thisMarker.addListener('click', function() {
+      infowindow.open(map, thisMarker);
+    });
 
         // chris - adds a new marker to the markers array
         markers.push(thisMarker);
