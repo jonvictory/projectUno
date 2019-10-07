@@ -6,7 +6,7 @@ var seconds = time % 60;
 var timeString = minutes + ":" + seconds;
 var intervalId;
 
-// chris - variable that will be part of limiting result selection to three
+// chris - variable that will be part of limiting results selection to three
 var resultsSelect = 0;
 
 // chris - array used to store checked restaurants
@@ -32,7 +32,6 @@ var firebaseConfig =
 };
 
 firebase.initializeApp(firebaseConfig);
-
 var database = firebase.database();
 
 $(document).ready(function () {
@@ -260,8 +259,6 @@ $(document).ready(function () {
         }
     }
 
-    /************************************************/
-
     /*
     chris - i was trying to build a remove marker function based on this information but, since we
     weren't using arrays yet, it wasn't working right. the functions to add markers had to be rebuilt
@@ -380,20 +377,21 @@ $(document).ready(function () {
 
     $("#beginPollBtn").on("click", function (event)
     {   
-        isPollRunning = true;
-
         if(isPollRunning === true)
         {
-            $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed");
-            $("#search").addClass("opacity-50 cursor-not-allowed");
-            $("#startTimer").addClass("opacity-50 cursor-not-allowed");
             console.log("button disabled");
-            clearInterval(intervalId);
-            intervalId = setInterval(countDown, 1000);
-                // chris - uploads yelp data to firebase in sub-folder called "projectUno"
-            database.ref("projectUno").push(selectionArray); 
             return;
         }
+
+        isPollRunning = true;
+
+        clearInterval(intervalId);
+        intervalId = setInterval(countDown, 1000);
+        $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed");
+        $("#search").addClass("opacity-50 cursor-not-allowed");
+        $("#startTimer").addClass("opacity-50 cursor-not-allowed");
+        // chris - uploads yelp data to firebase in sub-folder called "projectUno"
+        database.ref("projectUno/pollChoices").push(selectionArray); 
     });
 });
 
