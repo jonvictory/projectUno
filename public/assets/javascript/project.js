@@ -1,25 +1,25 @@
 // GLOBAL VARIABLES
-// chris - variable used for timer function
-var time = 179; // chris - time has to be 1 second less than the time you want to display
+// variables used for timer function
+var time = 179; // time has to be 1 second less than the time you want to display
 var minutes = Math.trunc(time / 60);
 var seconds = time % 60;
 var timeString = minutes + ":" + seconds;
 var intervalId;
 
-// chris - variable that will be part of limiting results selection to three
+// variable that will be part of limiting results selection to three
 var resultsSelect = 0;
 
-// chris - array used to store checked restaurants
+// array used to store checked restaurants
 var selectionArray = [];
-// chris - array used to store map markers
+// array used to store map markers
 var markers = [];
 var map;
 
-// chris - boolean that is used to disable checkbox clicks while poll is running
+// boolean that is used to disable checkbox clicks and search button while poll is running
 var isPollRunning = false;
 
 // FIREBASE
-// chris - code for loading Firebase
+// code for loading Firebase
 var firebaseConfig =
 {
   apiKey: "AIzaSyCZmpMUDLA55Li2JKm8K42Jv_gCAG_v5Lg",
@@ -45,13 +45,14 @@ $(document).ready(function () {
     //initMap();   
     geoInitialize()
 
-    // chris - used to display 3:00 for timer div
-    // if you change the time in the global variable for the timer, you need to change it here to
+    // used to display 3:00 for timer div
+    // if you change the time in the global variable for the timer, you need to change it here as well
     $("#timer").html("3:00");
 
     //search onclick that grabs values and stores from term and location
     $("#search").on("click", function (event) {
 
+        // part of code that disables button when poll is running.
         if(isPollRunning === true)
         {
             console.log("button disabled");
@@ -87,7 +88,7 @@ $(document).ready(function () {
                     // latitude = response.coordinates.latitude;
                     var resultsDiv = $("<div>");
 
-                    // chris - checkbox code
+                    // checkbox code
                     var label = $("<label>");
                     var checkbox = $("<input>");
                     var span = $("<span>");
@@ -98,16 +99,16 @@ $(document).ready(function () {
                     label.append(checkbox);
                     label.append(span);
 
-                    // chris - self variable had to be created to reference a proper scope
+                    // self variable had to be created to reference a proper scope
                     // for the variables needed
                     var self = this;
 
-                    // chris - code that tracks the amount of results selected
-                    // chris - checkbox.on click is a call back function
+                    // code that tracks the amount of results selected
+                    // checkbox.on click is a call back function
                     checkbox.on("click", function (event)
                     {
-                        //chris - this function disables the checkbox onclick even from processing
-                        //data and from removing or adding the visual check mark
+                        //this function disables the checkbox onclick event from processing
+                        //data and from removing or adding the map markers
                         if(isPollRunning === true)
                         {
                             console.log("button disabled");
@@ -122,7 +123,7 @@ $(document).ready(function () {
                             if (resultsSelect >= 3)
                             {
                                 checkbox.prop("checked", false);
-                                // chris - enables Begin Poll button once 3 restaurant options are selected
+                                // enables Begin Poll button once 3 restaurant options are selected
                                 $("#beginPollBtn").removeClass("opacity-50 cursor-not-allowed");
 
                                 console.log("Max selections already reached.");
@@ -131,7 +132,7 @@ $(document).ready(function () {
                             {
                                 resultsSelect++;
 
-                                // chris - checks to see if 3 selections have been made. if three selections have 
+                                // checks to see if 3 selections have been made. if three selections have 
                                 // been made, then the poll button is enabled.
                                 if(resultsSelect === 3)
                                 {
@@ -143,7 +144,7 @@ $(document).ready(function () {
 
                                 }
 
-                                // chris - object that stores items that will be pushed into array
+                                // object that stores items that will be pushed into array
                                 // and added to firebase
                                 var selectionObject =
                                 {
@@ -155,7 +156,7 @@ $(document).ready(function () {
                                     url:    self.url,                                   
                                 };
 
-                                // chris - command that pushes object into selectionArray
+                                // command that pushes object into selectionArray
                                 selectionArray.push(selectionObject);
                                 //console.log("SelectionArray: " + JSON.stringify(selectionArray));
                                 //console.log(selectionObject);
@@ -167,20 +168,13 @@ $(document).ready(function () {
                         else
                         {
                             resultsSelect--;
-                            // chris - disables Begin Poll button until 3 restaurant options are selected
+                            // disables Begin Poll button until 3 restaurant options are selected
                             $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed");
 
-                            // chris - iterates through the array and finds the name of the restaurant 
+                            // iterates through the array and finds the name of the restaurant 
                             // to be removed.
                             for(let i = 0; i < selectionArray.length; i++)
                             {
-                                // chris -
-                                // if statement below checks the name, latitude and longitude that is being deleted. 
-                                // rounding errors also need to betaken into account so the numbers are cut off
-                                // at 5 decimal places. this whole piece is important because if multiple 
-                                // restaurants with the same name, but different location are selected (i.e. McDonald's 
-                                // and other chains), then all of them would be deleted. including lat and long
-                                // helps account for that.
                                 if
                                 (
                                     selectionArray[i].name === self.name &&
@@ -200,32 +194,23 @@ $(document).ready(function () {
                         //console.log("Selections checked: " + resultsSelect);
                     });
                     
-                    //var nameResult = $("<a>")
                     resultsDiv.attr('class', 'selectedRes border-solid border-2 mt-1 border-black');
-                    //nameResult.append(name);
-                    // chris - changed to span.append from nameResult.append
                     span.append(name);
                     resultsDiv.attr('data-longitude', response.coordinates.longitude);
                     resultsDiv.attr('data-latitude', response.coordinates.latitude);
                     resultsDiv.attr('data-name', response.name);
-                    // chris - changed append to label from nameResult
                     resultsDiv.append(label);
                     $("#results").append(resultsDiv);
 
                 });
-<<<<<<< HEAD
-                clickSelection();
-                // geoMarker();
-=======
->>>>>>> 1850ab19fc5f8270ef2fe163299605a6a024f7ab
             }
         });
     }
 
-    // chris - function to add a marker to google map
+    // function to add a marker to google map
     function addMarker(selectionObject)
     {
-        // chris - create a marker and adds it to google maps
+        // creates a marker and adds it to google maps
         var thisMarker = new google.maps.Marker
         ({
             position: {lat: selectionObject.lat, lng: selectionObject.lng},
@@ -233,23 +218,16 @@ $(document).ready(function () {
             title: selectionObject.name
         });
 
-        // chris - adds a new marker to the markers array
+        // adds a new marker to the markers array
         markers.push(thisMarker);
         //console.log(thisMarker);
     }
 
-    // chris - function to remove a marker from the map
+    // function to remove a marker from the map
     function removeMarker(selectionObject)
     {
         for(let i = 0; i < markers.length; i++)
         {
-            // chris -
-            // if statement below checks the name, latitude and longitude that is being deleted. 
-            // rounding errors also need to betaken into account so the numbers are cut off
-            // at 5 decimal places. this whole piece is important because if multiple 
-            // restaurants with the same name, but different location are selected (i.e. McDonald's 
-            // and other chains), then all of them would be deleted. including lat and long
-            // helps account for that.
             if
             (
                 markers[i].title === selectionObject.name &&
@@ -257,19 +235,26 @@ $(document).ready(function () {
                 markers[i].position.lng().toFixed(5) === selectionObject.lng.toFixed(5)
             )
             {
-                // chris - removes the marker from the map and the marker array.
+                // removes the marker from the map and the marker array.
                 markers[i].setMap(null);
                 markers.splice(i, 1);
             }
         }
     }
 
-    /*
-    chris - i was trying to build a remove marker function based on this information but, since we
-    weren't using arrays yet, it wasn't working right. the functions to add markers had to be rebuilt
-    with arrays in mind. once the arrays were set up, that same information could be used to remove
-    markers as well.
+    // function that deletes all markers from map
+    function removeAllMarkers()
+    {
+        for(let i = 0; i < markers.length; i++)
+        {
+            // removes the marker from the map and the marker array.
+            markers[i].setMap(null);
+        }
 
+        markers = [];
+    }
+
+    /*
     //click function that currently console.logs the latitude and longitude of the selected location
     var mapLongitude = '';
     var mapLatitude = '';
@@ -334,11 +319,6 @@ $(document).ready(function () {
     }
 
     /*
-    chris - i was trying to build a remove marker function based on this information but, since we
-    weren't using arrays yet, it wasn't working right. the functions to add markers had to be rebuilt
-    with arrays in mind. once the arrays were set up, that same information could be used to remove
-    markers as well.
-
     function geoMarker() {
         // CURRENTLY: will add pin for roosters brewery in OGDEN. CITY SEARCH: OGDEN to test.
         var request = {
@@ -367,13 +347,13 @@ $(document).ready(function () {
     }
     */
 
-    // chris - functions that starts time when start timer button is clicked. 
+    // functions that starts time when start timer button is clicked. 
     // this will be tweaked when the polling section works.
 
     /*
     $("#startTimer").on("click", function (event)
     {
-        // chris - boolean is set to true so that search and checkbox are disabled
+        // boolean is set to true so that search and checkbox are disabled
         isPollRunning = true;
         
         $("#search").addClass("opacity-50 cursor-not-allowed");
@@ -385,6 +365,13 @@ $(document).ready(function () {
 
     $("#beginPollBtn").on("click", function (event)
     {   
+        // keeps button disabled until two selections are made
+        if (resultsSelect !== 3)
+        {
+            console.log("button disabled");
+            return;
+        }
+
         if(isPollRunning === true)
         {
             console.log("button disabled");
@@ -396,8 +383,8 @@ $(document).ready(function () {
         clearInterval(intervalId);
         intervalId = setInterval(countDown, 1000);
         $("#search").addClass("opacity-50 cursor-not-allowed");
-        //$("#startTimer").addClass("opacity-50 cursor-not-allowed");
-        // chris - uploads yelp data to firebase in sub-folder called "projectUno"
+        $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed");
+        // uploads yelp data to firebase in sub-folder called "projectUno/pollChoices"
         database.ref("projectUno/pollChoices").push(selectionArray); 
     });
 
@@ -407,10 +394,10 @@ $(document).ready(function () {
 
         var cs = childSnapshot.val();
 
-        // chris - this might not be needed
+        // this might not be needed
         var childKey = childSnapshot.key;
 
-        // chris - store snapshot information into a variable
+        // store snapshot information into a variable
         var restName0 = cs[0].name;
         var restAddress0 = cs[0].addr;
         var restRating0 = cs[0].rating;
@@ -426,31 +413,31 @@ $(document).ready(function () {
         var restRating2 = cs[2].rating;
         var restURL2 = cs[2].url;
 
-        // chris - console log information to make sure it displays correctly
+        // console log information to make sure it displays correctly
         console.log(restName0);
         console.log(restAddress0);
         console.log(restRating0);
-        console.log(restURL0);
+        //console.log(restURL0);
 
         console.log(restName1);
         console.log(restAddress1);
         console.log(restRating1);
-        console.log(restURL1);
+        //console.log(restURL1);
 
         console.log(restName2);
         console.log(restAddress2);
         console.log(restRating2);
-        console.log(restURL2);
+        //console.log(restURL2);
 
-        // chris - code for option 1
+        // code for option 1
         var voteName0 = $("<p>");
         var voteAddress0 = $("<p>");
         var voteRating0 = $("<p>");
         var voteURL0 = $("<p>");
 
         var voteButton0 = $("<button>");
-        voteButton0.attr("id", "voteBtn");
-        voteButton0.addClass("bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded");
+        voteButton0.attr("id", "0");
+        voteButton0.addClass("voteBtn bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded");
         voteButton0.text("Vote");
         var voteLabel0 = $("<div>");
         var voteDiv0 = $("<div>").addClass("mx-2 w-1/3 m-auto h-48 bg-blue-200 border border-white rounded");
@@ -468,15 +455,15 @@ $(document).ready(function () {
         voteDiv0.append(voteLabel0);
         $("#pollDiv").append(voteDiv0);
 
-        //chris - code for option 2
+        //code for option 2
         var voteName1 = $("<p>");
         var voteAddress1 = $("<p>");
         var voteRating1 = $("<p>");
         var voteURL1 = $("<p>");
 
         var voteButton1 = $("<button>");
-        voteButton1.attr("id", "voteBtn");
-        voteButton1.addClass("bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded");
+        voteButton1.attr("id", "1");
+        voteButton1.addClass("voteBtn bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded");
         voteButton1.text("Vote");
         var voteLabel1 = $("<div>");
         var voteDiv1 = $("<div>").addClass("w-1/3 m-auto h-48 bg-blue-200 border border-white rounded");
@@ -494,15 +481,15 @@ $(document).ready(function () {
         voteDiv1.append(voteLabel1);
         $("#pollDiv").append(voteDiv1);
 
-        //chris - code for option 3
+        //code for option 3
         var voteName2 = $("<p>");
         var voteAddress2 = $("<p>");
         var voteRating2 = $("<p>");
         var voteURL2 = $("<p>");
 
         var voteButton2 = $("<button>");
-        voteButton2.attr("id", "voteBtn");
-        voteButton2.addClass("bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded");
+        voteButton2.attr("id", "2");
+        voteButton2.addClass("voteBtn bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded");
         voteButton2.text("Vote");
         var voteLabel2 = $("<div>");
         var voteDiv2 = $("<div>").addClass("mx-2 w-1/3 m-auto h-48 bg-blue-200 border border-white rounded");
@@ -520,11 +507,38 @@ $(document).ready(function () {
         voteDiv2.append(voteLabel2);
         $("#pollDiv").append(voteDiv2);
 
+        // on click for vote buttons will need access to array out of scope, so var self is required
+        var self = this;
+
+        $(".voteBtn").on("click", function (event)
+        {
+            console.log($(this).attr("id"))
+        });
+
+        $("#resetPoll").on("click", function (event)
+        {
+            time = 179;
+            $("#timer").html("3:00");
+            isPollRunning = false;
+            resultsSelect = 0;
+            $("#locationInput").val("");
+            $("#termInput").val("");
+            $("#search").removeClass("opacity-50 cursor-not-allowed");
+            $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed");
+            $("#pollDiv").empty();
+            var ref = firebase.database().ref("projectUno");
+            ref.remove();
+            removeAllMarkers();
+            selectionArray = [];
+            // console.log(selectionArray);
+            $("#results").empty();
+            clearInterval(intervalId);
+        });
     });
 
 });
 
-// chris - function that handles timer when polling is open
+// function that handles timer when polling is open
 function countDown()
 {
     $("#timer").html(timeString);
@@ -535,7 +549,7 @@ function countDown()
         clearInterval(intervalId);
         $("#timer").html("0:00");
         console.log("time's up!")
-        // chris - this function below isn't built yet, it will display poll results when time hits zero.
+        // this function below isn't built yet, it will display poll results when time hits zero.
         //voteResult();
     }
 
@@ -548,7 +562,3 @@ function countDown()
     }
     timeString = minutes + ":" + seconds;
 }
-
-
-
-
