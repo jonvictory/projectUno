@@ -1,6 +1,4 @@
-// chris - variable that will be part of limiting result selection to three
-var resultsSelect = 0;
-
+// GLOBAL VARIABLES
 // chris - variable used for timer function
 var time = 179; // chris - time has to be 1 second less than the time you want to display
 var minutes = Math.trunc(time / 60);
@@ -8,11 +6,34 @@ var seconds = time % 60;
 var timeString = minutes + ":" + seconds;
 var intervalId;
 
+// chris - variable that will be part of limiting result selection to three
+var resultsSelect = 0;
+
 // chris - array used to store checked restaurants
 var selectionArray = [];
 // chris - array used to store map markers
 var markers = [];
 var map;
+
+// chris - boolean that is used to disable checkbox clicks while poll is running
+var isPollRunning = false;
+
+// FIREBASE
+// chris - code for loading Firebase
+var firebaseConfig =
+{
+  apiKey: "AIzaSyCZmpMUDLA55Li2JKm8K42Jv_gCAG_v5Lg",
+  authDomain: "bootcamp-project-09242019.firebaseapp.com",
+  databaseURL: "https://bootcamp-project-09242019.firebaseio.com",
+  projectId: "bootcamp-project-09242019",
+  storageBucket: "bootcamp-project-09242019.appspot.com",
+  messagingSenderId: "344953998725",
+  appId: "1:344953998725:web:119bcabddb32ce5dbd48ec"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+var database = firebase.database();
 
 $(document).ready(function () {
     //variables for Yelp API calls
@@ -25,12 +46,19 @@ $(document).ready(function () {
     //initMap();   
     geoInitialize()
 
-
     // chris - used to display 3:00 for timer div
+    // if you change the time in the global variable for the timer, you need to change it here to
     $("#timer").html("3:00");
 
     //search onclick that grabs values and stores from term and location
     $("#search").on("click", function (event) {
+
+        if(isPollRunning === true)
+        {
+            console.log("button disabled");
+            return;
+        }
+
         location = $("#locationInput").val().trim();
         term = $("#termInput").val().trim();
         yelpAPI();
@@ -79,6 +107,16 @@ $(document).ready(function () {
                     // chris - checkbox.on click is a call back function
                     checkbox.on("click", function (event)
                     {
+                        //chris - this function disables the checkbox onclick even from processing
+                        //data and from removing or adding the visual check mark
+                        if(isPollRunning === true)
+                        {
+                            console.log("button disabled");
+                            var status = checkbox.prop("checked");
+                            checkbox.prop("checked", !status);
+                            return;
+                        }
+
                         // console.log("Restaurant selected");
                         if ($(this).prop("checked") === true)
                         {
@@ -106,7 +144,8 @@ $(document).ready(function () {
 
                                 }
 
-                                // chris - object that stores items that will be pushed into array.
+                                // chris - object that stores items that will be pushed into array
+                                // and added to firebase
                                 var selectionObject =
                                 {
                                     name:   self.name,
@@ -330,8 +369,31 @@ $(document).ready(function () {
     // this will be tweaked when the polling section works.
     $("#startTimer").on("click", function (event)
     {
+        // chris - boolean is set to true so that search and checkbox are disabled
+        isPollRunning = true;
+        
+        $("#search").addClass("opacity-50 cursor-not-allowed");
+        $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed");
         clearInterval(intervalId);
         intervalId = setInterval(countDown, 1000);
+    });
+
+    $("#beginPollBtn").on("click", function (event)
+    {   
+        isPollRunning = true;
+
+        if(isPollRunning === true)
+        {
+            $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed");
+            $("#search").addClass("opacity-50 cursor-not-allowed");
+            $("#startTimer").addClass("opacity-50 cursor-not-allowed");
+            console.log("button disabled");
+            clearInterval(intervalId);
+            intervalId = setInterval(countDown, 1000);
+                // chris - uploads yelp data to firebase in sub-folder called "projectUno"
+            database.ref("projectUno").push(selectionArray); 
+            return;
+        }
     });
 });
 
