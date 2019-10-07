@@ -62,8 +62,8 @@ $(document).ready(function () {
         term = $("#termInput").val().trim();
         yelpAPI();
         geoFirstClick()
-        console.log(location);
-        console.log(term);
+        //console.log(location);
+        //console.log(term);
     });
   
     //Ajax Call for Yelp API
@@ -79,7 +79,7 @@ $(document).ready(function () {
             dataType: 'json',
             success: function (data) {
                 $.each(data.businesses, function (i, response) {
-                    console.log(response);
+                    //console.log(response);
                     name = response.name;
                     location = response.location;
                     // city = response.location.city;
@@ -157,11 +157,11 @@ $(document).ready(function () {
 
                                 // chris - command that pushes object into selectionArray
                                 selectionArray.push(selectionObject);
-                                console.log("SelectionArray: " + JSON.stringify(selectionArray));
-                                console.log(selectionObject);
+                                //console.log("SelectionArray: " + JSON.stringify(selectionArray));
+                                //console.log(selectionObject);
                                 addMarker(selectionObject);
 
-                                console.log("Selection added.");
+                                //console.log("Selection added.");
                             }
                         }
                         else
@@ -193,11 +193,11 @@ $(document).ready(function () {
                                 }
                             }
                             
-                            console.log("SelectionArray: " + JSON.stringify(selectionArray));
-                            console.log("Selection removed.");
+                            //console.log("SelectionArray: " + JSON.stringify(selectionArray));
+                            //console.log("Selection removed.");
 
                         }
-                        console.log("Selections checked: " + resultsSelect);
+                        //console.log("Selections checked: " + resultsSelect);
                     });
                     
                     //var nameResult = $("<a>")
@@ -230,7 +230,7 @@ $(document).ready(function () {
 
         // chris - adds a new marker to the markers array
         markers.push(thisMarker);
-        console.log(thisMarker);
+        //console.log(thisMarker);
     }
 
     // chris - function to remove a marker from the map
@@ -308,7 +308,7 @@ $(document).ready(function () {
         var geoApiKey = 'AIzaSyCK4EWTo5MHbt_OTstSiYYGKw5twoR8xuk'
         var geoQueryUrl = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + location + '&key=' + geoApiKey;
 
-        console.log(geoQueryUrl)
+        //console.log(geoQueryUrl)
 
         $.ajax({
             url: geoQueryUrl,
@@ -364,6 +364,8 @@ $(document).ready(function () {
 
     // chris - functions that starts time when start timer button is clicked. 
     // this will be tweaked when the polling section works.
+
+    /*
     $("#startTimer").on("click", function (event)
     {
         // chris - boolean is set to true so that search and checkbox are disabled
@@ -374,6 +376,7 @@ $(document).ready(function () {
         clearInterval(intervalId);
         intervalId = setInterval(countDown, 1000);
     });
+    */
 
     $("#beginPollBtn").on("click", function (event)
     {   
@@ -387,19 +390,140 @@ $(document).ready(function () {
 
         clearInterval(intervalId);
         intervalId = setInterval(countDown, 1000);
-        $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed");
         $("#search").addClass("opacity-50 cursor-not-allowed");
-        $("#startTimer").addClass("opacity-50 cursor-not-allowed");
+        //$("#startTimer").addClass("opacity-50 cursor-not-allowed");
         // chris - uploads yelp data to firebase in sub-folder called "projectUno"
         database.ref("projectUno/pollChoices").push(selectionArray); 
     });
+
+    database.ref("projectUno/pollChoices").on("child_added", function(childSnapshot)
+    {
+        console.log(childSnapshot.val());
+
+        var cs = childSnapshot.val();
+
+        // chris - this might not be needed
+        var childKey = childSnapshot.key;
+
+        // chris - store snapshot information into a variable
+        var restName0 = cs[0].name;
+        var restAddress0 = cs[0].addr;
+        var restRating0 = cs[0].rating;
+        var restURL0 = cs[0].url;
+
+        var restName1 = cs[1].name;
+        var restAddress1 = cs[1].addr;
+        var restRating1 = cs[1].rating;
+        var restURL1 = cs[1].url;
+
+        var restName2 = cs[2].name;
+        var restAddress2 = cs[2].addr;
+        var restRating2 = cs[2].rating;
+        var restURL2 = cs[2].url;
+
+        // chris - console log information to make sure it displays correctly
+        console.log(restName0);
+        console.log(restAddress0);
+        console.log(restRating0);
+        console.log(restURL0);
+
+        console.log(restName1);
+        console.log(restAddress1);
+        console.log(restRating1);
+        console.log(restURL1);
+
+        console.log(restName2);
+        console.log(restAddress2);
+        console.log(restRating2);
+        console.log(restURL2);
+
+        // chris - code for option 1
+        var voteName0 = $("<p>");
+        var voteAddress0 = $("<p>");
+        var voteRating0 = $("<p>");
+        var voteURL0 = $("<p>");
+
+        var voteButton0 = $("<button>");
+        voteButton0.attr("id", "voteBtn");
+        voteButton0.addClass("bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded");
+        voteButton0.text("Vote");
+        var voteLabel0 = $("<div>");
+        var voteDiv0 = $("<div>").addClass("mx-2 w-1/3 m-auto h-48 bg-blue-200 border border-white rounded");
+
+        voteName0.text(restName0);
+        voteAddress0.text(restAddress0);
+        voteRating0.text("Rating: " + restRating0);
+        //voteURL0.text(restURL0);
+
+        voteLabel0.append(voteName0);
+        voteLabel0.append(voteAddress0);
+        voteLabel0.append(voteRating0);
+        //voteLabel0.append(voteURL0);
+        voteLabel0.append(voteButton0);
+        voteDiv0.append(voteLabel0);
+        $("#pollDiv").append(voteDiv0);
+
+        //chris - code for option 2
+        var voteName1 = $("<p>");
+        var voteAddress1 = $("<p>");
+        var voteRating1 = $("<p>");
+        var voteURL1 = $("<p>");
+
+        var voteButton1 = $("<button>");
+        voteButton1.attr("id", "voteBtn");
+        voteButton1.addClass("bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded");
+        voteButton1.text("Vote");
+        var voteLabel1 = $("<div>");
+        var voteDiv1 = $("<div>").addClass("w-1/3 m-auto h-48 bg-blue-200 border border-white rounded");
+
+        voteName1.text(restName1);
+        voteAddress1.text(restAddress1);
+        voteRating1.text("Rating: " + restRating1);
+        //voteURL1.text(restURL1);
+
+        voteLabel1.append(voteName1);
+        voteLabel1.append(voteAddress1);
+        voteLabel1.append(voteRating1);
+        //voteLabel1.append(voteURL1);
+        voteLabel1.append(voteButton1);
+        voteDiv1.append(voteLabel1);
+        $("#pollDiv").append(voteDiv1);
+
+        //chris - code for option 3
+        var voteName2 = $("<p>");
+        var voteAddress2 = $("<p>");
+        var voteRating2 = $("<p>");
+        var voteURL2 = $("<p>");
+
+        var voteButton2 = $("<button>");
+        voteButton2.attr("id", "voteBtn");
+        voteButton2.addClass("bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded");
+        voteButton2.text("Vote");
+        var voteLabel2 = $("<div>");
+        var voteDiv2 = $("<div>").addClass("mx-2 w-1/3 m-auto h-48 bg-blue-200 border border-white rounded");
+
+        voteName2.text(restName2);
+        voteAddress2.text(restAddress2);
+        voteRating2.text("Rating: " + restRating2);
+        //voteURL2.text(restURL2);
+
+        voteLabel2.append(voteName2);
+        voteLabel2.append(voteAddress2);
+        voteLabel2.append(voteRating2);
+        //voteLabel2.append(voteURL2);
+        voteLabel2.append(voteButton2);
+        voteDiv2.append(voteLabel2);
+        $("#pollDiv").append(voteDiv2);
+
+    });
+
 });
 
 // chris - function that handles timer when polling is open
 function countDown()
 {
     $("#timer").html(timeString);
-    console.log(timeString);
+    //console.log(timeString);
 
     if(time <= 0)
     {
