@@ -18,6 +18,16 @@ var map;
 // boolean that is used to disable checkbox clicks and search button while poll is running
 var isPollRunning = false;
 
+/***********************************************************/
+// boolean that disables voting buttons after a vote is cast
+var isVoteCast = false;
+
+// variables for incrementing vote count
+var votes0 = 0;
+var votes1 = 0;
+var votes2 = 0;
+/***********************************************************/
+
 // FIREBASE
 // code for loading Firebase
 var firebaseConfig =
@@ -107,8 +117,8 @@ $(document).ready(function () {
                     // checkbox.on click is a call back function
                     checkbox.on("click", function (event)
                     {
-                        //this function disables the checkbox onclick event from processing
-                        //data and from removing or adding the map markers
+                        // this function disables the checkbox onclick event from processing
+                        // data and from removing or adding the map markers
                         if(isPollRunning === true)
                         {
                             console.log("button disabled");
@@ -154,7 +164,7 @@ $(document).ready(function () {
                                     addr:   self.location.display_address,
                                     rating: self.rating,
                                     reviewCount: self.review_count,
-                                    price: self.price,
+                                    //price: self.price,
                                     phone: self.phone,
                                     city: self.location.city,
                                     url:    self.url,                                   
@@ -221,7 +231,7 @@ $(document).ready(function () {
             position: {lat: selectionObject.lat, lng: selectionObject.lng},
             map: map,
             title: selectionObject.name,
-            price: selectionObject.price,
+            //price: selectionObject.price,
             rating: selectionObject.rating,
             reviewCount: selectionObject.reviewCount,
             city: selectionObject.city
@@ -234,7 +244,11 @@ $(document).ready(function () {
         '</div>'+
         '<h1 id="firstHeading" class="firstHeading">'+selectionObject.name+'</h1>'+
         '<div id="bodyContent">'+
-        '<ul><li>Rating: '+selectionObject.rating+'</li><li>Total Reviews: '+selectionObject.reviewCount+'</li><li>Price Level: '+selectionObject.price+'</li><li>City: '+selectionObject.city+ '</li>';
+        '<ul>'
+        '<li>Rating: '+selectionObject.rating+'</li>'
+        '<li>Total Reviews: '+selectionObject.reviewCount+ '</li>'
+        //<li>Price Level: '+selectionObject.price+ '</li>'
+        '<li>City: ' +selectionObject.city+ '</li>';
   
     var infowindow = new google.maps.InfoWindow({
       content: contentString
@@ -373,52 +387,95 @@ $(document).ready(function () {
     }
     */
 
-    // functions that starts time when start timer button is clicked. 
-    // this will be tweaked when the polling section works.
+   $("#beginPollBtn").on("click", function (event)
+   {   
+       // keeps button disabled until three selections are made
+       if (resultsSelect !== 3)
+       {
+           console.log("button disabled");
+           return;
+       }
 
-    /*
-    $("#startTimer").on("click", function (event)
+       if (isPollRunning === true)
+       {
+           console.log("button disabled");
+           return;
+       }
+
+       /********************************************************/
+       var ref = firebase.database().ref("projectUno");
+       // ref.remove empties out "projectUno" folder that is created in firebase
+       ref.remove();
+
+       // this creates a sub folder within projectUno in FireBase called pollStatus
+       // and pushes up a boolean variable that will allow boolean values to be updated
+       // on any computer that is logged on to the webpage.
+       database.ref("projectUno/pollStatus").push({isPollRunning: true});
+       /********************************************************/
+   });
+
+    /************************************************************/
+    // pushes up to firebase and changes boolean to false
+    $("#resetPoll").on("click", function (event)
     {
-        // boolean is set to true so that search and checkbox are disabled
-        isPollRunning = true;
-        
-        $("#search").addClass("opacity-50 cursor-not-allowed");
-        $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed");
-        clearInterval(intervalId);
-        intervalId = setInterval(countDown, 1000);
+        var ref = firebase.database().ref("projectUno");
+        ref.remove();
+
+        database.ref("projectUno/pollStatus").push({isPollRunning: false});
     });
-    */
+    /************************************************************/
 
-    $("#beginPollBtn").on("click", function (event)
-    {   
-        // keeps button disabled until two selections are made
-        if (resultsSelect !== 3)
+    /*****************************************************************************/
+    // this function controls what happens when the user hits either the start new or begin button
+    // from FireBase
+    database.ref("projectUno/pollStatus").on("child_added", function(childSnapshot)
+    {
+        var cs = childSnapshot.val();
+
+        // this statement is run when the user selects reset poll
+        if (!cs.isPollRunning)
         {
-            console.log("button disabled");
-            return;
+            //console.log("here");
+            isVoteCast = false;
+            votes0 = 0;
+            votes1 = 0;
+            votes2 = 0;
+            time = 179;
+            $("#timer").html("3:00");
+            isPollRunning = false;
+            resultsSelect = 0;
+            $("#locationInput").val("");
+            $("#termInput").val("");
+            $("#search").removeClass("opacity-50 cursor-not-allowed");
+            $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed");
+            $("#pollDiv").empty();
+            removeAllMarkers();
+            selectionArray = [];
+            // console.log(selectionArray);
+            $("#results").empty();
+            clearInterval(intervalId);
         }
-
-        if(isPollRunning === true)
+        //this statement is run if the user selects the begin poll button
+        else
         {
-            console.log("button disabled");
-            return;
+            isPollRunning = true;
+            clearInterval(intervalId);
+            intervalId = setInterval(countDown, 1000);
+            $("#search").addClass("opacity-50 cursor-not-allowed");
+            $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed");
+            // uploads yelp data to firebase in sub-folder called "projectUno/pollChoices"
+            database.ref("projectUno/pollChoices").push(selectionArray);
         }
-
-        isPollRunning = true;
-
-        clearInterval(intervalId);
-        intervalId = setInterval(countDown, 1000);
-        $("#search").addClass("opacity-50 cursor-not-allowed");
-        $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed");
-        // uploads yelp data to firebase in sub-folder called "projectUno/pollChoices"
-        database.ref("projectUno/pollChoices").push(selectionArray); 
     });
+    /*********************************************************************************/
 
+    // this is the child added listener that runs when the begin poll button is clicked
     database.ref("projectUno/pollChoices").on("child_added", function(childSnapshot)
     {
         console.log(childSnapshot.val());
 
         var cs = childSnapshot.val();
+
 
         // this might not be needed
         var childKey = childSnapshot.key;
@@ -440,26 +497,44 @@ $(document).ready(function () {
         var restURL2 = cs[2].url;
 
         // console log information to make sure it displays correctly
-        console.log(restName0);
-        console.log(restAddress0);
-        console.log(restRating0);
+        //console.log(restName0);
+        //console.log(restAddress0);
+        //console.log(restRating0);
         //console.log(restURL0);
 
-        console.log(restName1);
-        console.log(restAddress1);
-        console.log(restRating1);
+        //console.log(restName1);
+        //console.log(restAddress1);
+        //console.log(restRating1);
         //console.log(restURL1);
 
-        console.log(restName2);
-        console.log(restAddress2);
-        console.log(restRating2);
+        //console.log(restName2);
+        //console.log(restAddress2);
+        //console.log(restRating2);
         //console.log(restURL2);
+
+        /***********************************/
+        // removes markers and then readds to all computers that log in
+        removeAllMarkers();
+
+        for (let i = 0; i < cs.length; i++)
+        {
+            addMarker(
+            {
+                name: cs[i].name,
+                lng:  cs[i].lng,
+                lat:  cs[i].lat,
+            });
+        }
+        /*************************************/
 
         // code for option 1
         var voteName0 = $("<p>");
         var voteAddress0 = $("<p>");
         var voteRating0 = $("<p>");
         var voteURL0 = $("<p>");
+        // variables for tracking votes
+        var voteCount0 = $("<p>").text("Votes: " + votes0);
+        voteCount0.attr("id", "voteP0");
 
         var voteButton0 = $("<button>");
         voteButton0.attr("id", "0");
@@ -467,6 +542,8 @@ $(document).ready(function () {
         voteButton0.text("Vote");
         var voteLabel0 = $("<div>");
         var voteDiv0 = $("<div>").addClass("mx-2 w-1/3 m-auto h-48 bg-blue-200 border border-white rounded");
+        // class added to control changes when vote is cast and when time runs out
+        voteDiv0.attr("id", "voteDiv0");
 
         voteName0.text(restName0);
         voteAddress0.text(restAddress0);
@@ -478,6 +555,8 @@ $(document).ready(function () {
         voteLabel0.append(voteRating0);
         //voteLabel0.append(voteURL0);
         voteLabel0.append(voteButton0);
+        // coding for adding vote count
+        voteLabel0.append(voteCount0);
         voteDiv0.append(voteLabel0);
         $("#pollDiv").append(voteDiv0);
 
@@ -486,6 +565,9 @@ $(document).ready(function () {
         var voteAddress1 = $("<p>");
         var voteRating1 = $("<p>");
         var voteURL1 = $("<p>");
+        //
+        var voteCount1 = $("<p>").text("Votes: " + votes1);
+        voteCount1.attr("id", "voteP1");
 
         var voteButton1 = $("<button>");
         voteButton1.attr("id", "1");
@@ -493,6 +575,8 @@ $(document).ready(function () {
         voteButton1.text("Vote");
         var voteLabel1 = $("<div>");
         var voteDiv1 = $("<div>").addClass("w-1/3 m-auto h-48 bg-blue-200 border border-white rounded");
+        //
+        voteDiv1.attr("id", "voteDiv1");
 
         voteName1.text(restName1);
         voteAddress1.text(restAddress1);
@@ -504,6 +588,8 @@ $(document).ready(function () {
         voteLabel1.append(voteRating1);
         //voteLabel1.append(voteURL1);
         voteLabel1.append(voteButton1);
+        //
+        voteLabel1.append(voteCount1);
         voteDiv1.append(voteLabel1);
         $("#pollDiv").append(voteDiv1);
 
@@ -512,6 +598,9 @@ $(document).ready(function () {
         var voteAddress2 = $("<p>");
         var voteRating2 = $("<p>");
         var voteURL2 = $("<p>");
+        //
+        var voteCount2 = $("<p>").text("Votes: " + votes2);
+        voteCount2.attr("id", "voteP2");
 
         var voteButton2 = $("<button>");
         voteButton2.attr("id", "2");
@@ -519,6 +608,8 @@ $(document).ready(function () {
         voteButton2.text("Vote");
         var voteLabel2 = $("<div>");
         var voteDiv2 = $("<div>").addClass("mx-2 w-1/3 m-auto h-48 bg-blue-200 border border-white rounded");
+        //
+        voteDiv2.attr("id", "voteDiv2");
 
         voteName2.text(restName2);
         voteAddress2.text(restAddress2);
@@ -530,36 +621,79 @@ $(document).ready(function () {
         voteLabel2.append(voteRating2);
         //voteLabel2.append(voteURL2);
         voteLabel2.append(voteButton2);
+        //
+        voteLabel2.append(voteCount2);
         voteDiv2.append(voteLabel2);
         $("#pollDiv").append(voteDiv2);
 
-        // on click for vote buttons will need access to array out of scope, so var self is required
-        var self = this;
-
+        /************************************************/
+        // code that tracks vote totals
         $(".voteBtn").on("click", function (event)
         {
             console.log($(this).attr("id"))
-        });
 
-        $("#resetPoll").on("click", function (event)
-        {
-            time = 179;
-            $("#timer").html("3:00");
-            isPollRunning = false;
-            resultsSelect = 0;
-            $("#locationInput").val("");
-            $("#termInput").val("");
-            $("#search").removeClass("opacity-50 cursor-not-allowed");
-            $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed");
-            $("#pollDiv").empty();
-            var ref = firebase.database().ref("projectUno");
-            ref.remove();
-            removeAllMarkers();
-            selectionArray = [];
-            // console.log(selectionArray);
-            $("#results").empty();
-            clearInterval(intervalId);
+            if(isVoteCast)
+            {
+                console.log("Button0 Disabled, son")
+                return;
+            }
+
+            // setting boolean to true MUST come after if statement or it won't work
+            isVoteCast = true;
+            $(".voteBtn").addClass("opacity-50 cursor-not-allowed")
+
+            // this refers back to the button click
+            if($(this).attr("id") === "0")
+            {
+                //console.log("clicks still happening0");
+                votes0++;
+                console.log("Votes: " + votes0);
+                $("#voteDiv0").removeClass("bg-blue-200");
+                $("#voteDiv0").addClass("bg-green-200");
+            }
+
+            else if($(this).attr("id") === "1")
+            {
+                //console.log("clicks still happening1");
+                votes1++;
+                console.log("Votes: " + votes1);
+                $("#voteDiv1").removeClass("bg-blue-200");
+                $("#voteDiv1").addClass("bg-green-200");
+            }
+
+            else
+            {
+                //console.log("clicks still happening2");
+                votes2++;
+                console.log("Votes: " + votes2);
+                $("#voteDiv2").removeClass("bg-blue-200");
+                $("#voteDiv2").addClass("bg-green-200");
+            }
+
+            // this function removes the vote count that is currently stored in firebase
+            var ref2 = firebase.database().ref("projectUno/voteCount");
+            ref2.remove();
+
+            // this function grabs the updated vote count and pushes it to firebase
+            database.ref("projectUno/voteCount").push({votes0, votes1, votes2});
+
         });
+        /******************************************************/
+
+    });
+
+    // this code controls adding the updated vote count to the webpage once it hits firebase and the event listener triggers
+    database.ref("projectUno/voteCount").on("child_added", function(childSnapshot)
+    {
+        var csVote = childSnapshot.val();
+        
+        votes0 = csVote.votes0;
+        votes1 = csVote.votes1;
+        votes2 = csVote.votes2;
+
+        $("#voteP0").text("Votes: " + votes0);
+        $("#voteP1").text("Votes: " + votes1);
+        $("#voteP2").text("Votes: " + votes2);
     });
 
 });
@@ -575,8 +709,7 @@ function countDown()
         clearInterval(intervalId);
         $("#timer").html("0:00");
         console.log("time's up!")
-        // this function below isn't built yet, it will display poll results when time hits zero.
-        //voteResult();
+        voteResult();
     }
 
     time--;
@@ -588,3 +721,30 @@ function countDown()
     }
     timeString = minutes + ":" + seconds;
 }
+
+/**************************************************/
+// function that is called when timer hits 0
+function voteResult()
+{
+    if (votes0 > votes1 && votes0 > votes2)
+    {
+        $("#voteDiv0").removeClass("bg-blue-200");
+        $("#voteDiv0").removeClass("bg-green-200");
+        $("#voteDiv0").addClass("bg-red-200");
+    }
+
+    else if (votes1 > votes0 && votes1 > votes2)
+    {
+        $("#voteDiv1").removeClass("bg-blue-200");
+        $("#voteDiv1").removeClass("bg-green-200");
+        $("#voteDiv1").addClass("bg-red-200");
+    }
+
+    else if (votes2 > votes0 && votes2 > votes1)
+    {
+        $("#voteDiv2").removeClass("bg-blue-200");
+        $("#voteDiv2").removeClass("bg-green-200");
+        $("#voteDiv2").addClass("bg-red-200");
+    }
+}
+/******************************************************/
