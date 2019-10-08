@@ -315,7 +315,7 @@ $(document).ready(function () {
         // Create a map centered in SLC.
         map = new google.maps.Map(document.getElementById('map'), {
             center: { lat: 40.7608, lng: -111.8910 },
-            zoom: 15
+            zoom: 18
         });
     }
 
