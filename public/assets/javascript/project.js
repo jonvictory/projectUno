@@ -402,8 +402,9 @@ $(document).ready(function () {
 
         /***********************************/
         // removes markers and then readds to all computers that log in
-        removeAllMarkers();
         geoFirstClickUpdate()
+        removeAllMarkers();
+       
 
         for (let i = 0; i < cs.length; i++) {
             addMarker(
