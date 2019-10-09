@@ -298,7 +298,6 @@ var geoResponse = "";
         });
     }
 
-
     $("#beginPollBtn").on("click", function (event) {
         // keeps button disabled until three selections are made
         if (resultsSelect !== 3) {
@@ -363,17 +362,39 @@ var geoResponse = "";
         }
         //this statement is run if the user selects the begin poll button
         else {
+            
             isPollRunning = true;
             clearInterval(intervalId);
             intervalId = setInterval(countDown, 1000);
             $("#search").addClass("opacity-50 cursor-not-allowed");
             $("#beginPollBtn").addClass("opacity-50 cursor-not-allowed");
+            database.ref("projectUno/geoData").push(geoResponse);
             // uploads yelp data to firebase in sub-folder called "projectUno/pollChoices"
             database.ref("projectUno/pollChoices").push(selectionArray);
+            
         }
     });
     /*********************************************************************************/
+    database.ref("projectUno/geoData").on("child_added", function (childSnapshot) {
 
+        var cs = childSnapshot.val();
+        var geoResponselat = cs.lat;
+var geoResponselng = cs.lng;
+// var geoResponseAll = { elat+','+geoResponselng }
+// console.log(geoResponseAll)
+console.log(geoResponselat)
+console.log(geoResponselng)
+console.log(cs.lat)
+console.log(cs.lng)
+console.log(geoUpdate)
+geoUpdate();
+        function geoUpdate() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat: geoResponselat, lng: geoResponselng},
+                zoom: 15
+            });
+        }
+    })
     // this is the child added listener that runs when the begin poll button is clicked
     database.ref("projectUno/pollChoices").on("child_added", function (childSnapshot) {
         console.log(childSnapshot.val());
@@ -400,19 +421,14 @@ var geoResponse = "";
         var restRating2 = cs[2].rating;
         var restURL2 = cs[2].url;
 
+
         /***********************************/
         // removes markers and then readds to all computers that log in
-        removeAllMarkers();
-        geoUpdate(geoResponse)
-        console.log(geoResponse)
-        console.log(geoUpdate(geoResponse))
         
-        function geoUpdate(geoResponse) {
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: geoResponse,
-                zoom: 15
-            });
-        }
+        removeAllMarkers();
+
+
+        
         
 
         for (let i = 0; i < cs.length; i++) {
