@@ -272,7 +272,7 @@ $(document).ready(function () {
         // Create a map centered in SLC.
         map = new google.maps.Map(document.getElementById('map'), {
             center: { lat: 40.7608, lng: -111.8910 },
-            zoom: 18
+            zoom: 9
         });
     }
     var geoResponse;
@@ -296,7 +296,7 @@ $(document).ready(function () {
     function geoFirstClickUpdate(geoResponse) {
         map = new google.maps.Map(document.getElementById('map'), {
             center: geoResponse,
-            zoom: 15
+            zoom: 9
         });
     }
 
@@ -394,7 +394,7 @@ $(document).ready(function () {
         function geoUpdate() {
             map = new google.maps.Map(document.getElementById('map'), {
                 center: { lat: geoResponselat, lng: geoResponselng },
-                zoom: 15
+                zoom: 9
             });
         }
     })
