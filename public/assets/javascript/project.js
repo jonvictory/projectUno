@@ -208,7 +208,7 @@ $(document).ready(function () {
                         //console.log("Selections checked: " + resultsSelect);
                     });
                     
-                    resultsDiv.attr('class', 'selectedRes rounded border-solid bg-gray-800 text-white border-2 mt-1 border-black');
+                    resultsDiv.attr('class', 'selectedRes border-solid border-2 mt-1 border-black');
                     span.append(name);
                     resultsDiv.attr('data-longitude', response.coordinates.longitude);
                     resultsDiv.attr('data-latitude', response.coordinates.latitude);
@@ -515,6 +515,7 @@ $(document).ready(function () {
         /***********************************/
         // removes markers and then readds to all computers that log in
         removeAllMarkers();
+        geoFirstClickUpdate()
 
         for (let i = 0; i < cs.length; i++)
         {
@@ -538,7 +539,7 @@ $(document).ready(function () {
 
         var voteButton0 = $("<button>");
         voteButton0.attr("id", "0");
-        voteButton0.addClass("voteBtn bg-teal-500 hover:bg-teal-400 text-white font-bold py-2 px-4 border-b-4 border-teal-700 hover:border-teal-500 rounded");
+        voteButton0.addClass("voteBtn bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded");
         voteButton0.text("Vote");
         var voteLabel0 = $("<div>");
         var voteDiv0 = $("<div>").addClass("mx-2 w-1/3 m-auto h-48 bg-blue-200 border border-white rounded");
@@ -571,7 +572,7 @@ $(document).ready(function () {
 
         var voteButton1 = $("<button>");
         voteButton1.attr("id", "1");
-        voteButton1.addClass("voteBtn bg-teal-500 hover:bg-teal-400 text-white font-bold py-2 px-4 border-b-4 border-teal-700 hover:border-teal-500 rounded");
+        voteButton1.addClass("voteBtn bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded");
         voteButton1.text("Vote");
         var voteLabel1 = $("<div>");
         var voteDiv1 = $("<div>").addClass("w-1/3 m-auto h-48 bg-blue-200 border border-white rounded");
@@ -604,7 +605,7 @@ $(document).ready(function () {
 
         var voteButton2 = $("<button>");
         voteButton2.attr("id", "2");
-        voteButton2.addClass("voteBtn bg-teal-500 hover:bg-teal-400 text-white font-bold py-2 px-4 border-b-4 border-teal-700 hover:border-teal-500 rounded");
+        voteButton2.addClass("voteBtn bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded");
         voteButton2.text("Vote");
         var voteLabel2 = $("<div>");
         var voteDiv2 = $("<div>").addClass("mx-2 w-1/3 m-auto h-48 bg-blue-200 border border-white rounded");
