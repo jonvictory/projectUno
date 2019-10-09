@@ -273,7 +273,7 @@ $(document).ready(function () {
             zoom: 18
         });
     }
-
+var geoResponse = "";
     function geoFirstClick(city) {
 
         var geoApiKey = 'AIzaSyCK4EWTo5MHbt_OTstSiYYGKw5twoR8xuk'
@@ -285,7 +285,7 @@ $(document).ready(function () {
             method: "GET"
         }).then(function (response) {
 
-            var geoResponse = response.results[0].geometry.location
+            geoResponse = response.results[0].geometry.location
 
             geoFirstClickUpdate(geoResponse)
         });
@@ -402,9 +402,18 @@ $(document).ready(function () {
 
         /***********************************/
         // removes markers and then readds to all computers that log in
-        geoFirstClickUpdate()
         removeAllMarkers();
-       
+        geoUpdate(geoResponse)
+        console.log(geoResponse)
+        console.log(geoUpdate(geoResponse))
+        
+        function geoUpdate(geoResponse) {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: geoResponse,
+                zoom: 15
+            });
+        }
+        
 
         for (let i = 0; i < cs.length; i++) {
             addMarker(
