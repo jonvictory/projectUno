@@ -5,7 +5,6 @@ var minutes = Math.trunc(time / 60);
 var seconds = time % 60;
 var timeString = minutes + ":" + seconds;
 var intervalId;
-
 // variable that will be part of limiting results selection to three
 var resultsSelect = 0;
 
@@ -53,7 +52,7 @@ $(document).ready(function () {
     //var longitude;
     //var latitude;
     //initMap();   
-    geoInitialize()
+    geoInitialize();
 
     // used to display 3:00 for timer div
     // if you change the time in the global variable for the timer, you need to change it here as well
@@ -69,9 +68,11 @@ $(document).ready(function () {
         }
 
         location = $("#locationInput").val().trim();
+        console.log(location);
         term = $("#termInput").val().trim();
         yelpAPI();
-        geoFirstClick()
+        geoFirstClick();
+        event.preventDefault();
     });
 
     //Ajax Call for Yelp API
@@ -115,6 +116,7 @@ $(document).ready(function () {
                     checkbox.on("click", function (event) {
                         // this function disables the checkbox onclick event from processing
                         // data and from removing or adding the map markers
+
                         if (isPollRunning === true) {
                             console.log("button disabled");
                             var status = checkbox.prop("checked");
@@ -270,10 +272,10 @@ $(document).ready(function () {
         // Create a map centered in SLC.
         map = new google.maps.Map(document.getElementById('map'), {
             center: { lat: 40.7608, lng: -111.8910 },
-            zoom: 18
+            zoom: 9
         });
     }
-var geoResponse = "";
+    var geoResponse;
     function geoFirstClick(city) {
 
         var geoApiKey = 'AIzaSyCK4EWTo5MHbt_OTstSiYYGKw5twoR8xuk'
@@ -294,7 +296,7 @@ var geoResponse = "";
     function geoFirstClickUpdate(geoResponse) {
         map = new google.maps.Map(document.getElementById('map'), {
             center: geoResponse,
-            zoom: 15
+            zoom: 9
         });
     }
 
@@ -317,6 +319,7 @@ var geoResponse = "";
 
         // this creates a sub folder within projectUno in FireBase called pollStatus
         // and pushes up a boolean variable that will allow boolean values to be updated
+
         // on any computer that is logged on to the webpage.
         database.ref("projectUno/pollStatus").push({ isPollRunning: true });
         /********************************************************/
@@ -337,7 +340,7 @@ var geoResponse = "";
     // from FireBase
     database.ref("projectUno/pollStatus").on("child_added", function (childSnapshot) {
         var cs = childSnapshot.val();
-
+        database.ref("projectUno/geoData").push(geoResponse);
         // this statement is run when the user selects reset poll
         if (!cs.isPollRunning) {
             //console.log("here");
@@ -362,7 +365,7 @@ var geoResponse = "";
         }
         //this statement is run if the user selects the begin poll button
         else {
-            
+
             isPollRunning = true;
             clearInterval(intervalId);
             intervalId = setInterval(countDown, 1000);
@@ -371,7 +374,7 @@ var geoResponse = "";
             database.ref("projectUno/geoData").push(geoResponse);
             // uploads yelp data to firebase in sub-folder called "projectUno/pollChoices"
             database.ref("projectUno/pollChoices").push(selectionArray);
-            
+
         }
     });
     /*********************************************************************************/
@@ -379,19 +382,19 @@ var geoResponse = "";
 
         var cs = childSnapshot.val();
         var geoResponselat = cs.lat;
-var geoResponselng = cs.lng;
-// var geoResponseAll = { elat+','+geoResponselng }
-// console.log(geoResponseAll)
-console.log(geoResponselat)
-console.log(geoResponselng)
-console.log(cs.lat)
-console.log(cs.lng)
-console.log(geoUpdate)
-geoUpdate();
+        var geoResponselng = cs.lng;
+        // var geoResponseAll = { elat+','+geoResponselng }
+        // console.log(geoResponseAll)
+        console.log(geoResponselat)
+        console.log(geoResponselng)
+        console.log(cs.lat)
+        console.log(cs.lng)
+        console.log(geoUpdate)
+        geoUpdate();
         function geoUpdate() {
             map = new google.maps.Map(document.getElementById('map'), {
-                center: {lat: geoResponselat, lng: geoResponselng},
-                zoom: 15
+                center: { lat: geoResponselat, lng: geoResponselng },
+                zoom: 9
             });
         }
     })
@@ -424,12 +427,12 @@ geoUpdate();
 
         /***********************************/
         // removes markers and then readds to all computers that log in
-        
+
         removeAllMarkers();
 
 
-        
-        
+
+
 
         for (let i = 0; i < cs.length; i++) {
             addMarker(
